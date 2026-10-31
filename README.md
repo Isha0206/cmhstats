@@ -1,5 +1,7 @@
 # cmhstats
 
+[![PyPI](https://img.shields.io/pypi/v/cmhstats)](https://pypi.org/project/cmhstats/)
+[![Python](https://img.shields.io/pypi/pyversions/cmhstats)](https://pypi.org/project/cmhstats/)
 [![tests](https://github.com/Isha0206/cmhstats/actions/workflows/tests.yml/badge.svg)](https://github.com/Isha0206/cmhstats/actions/workflows/tests.yml)
 
 Cochran-Mantel-Haenszel (CMH) statistics for Python that reproduce SAS `PROC FREQ / CMH` and R's `mantelhaen.test`, with the equivalence tests to show it.
