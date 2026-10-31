@@ -1,0 +1,37 @@
+{
+  "info": {
+    "R": "R version 4.3.3 (2024-02-29)",
+    "vcdExtra": "0.8.5",
+    "coin": "1.4.3",
+    "epiR": "2.0.67",
+    "generated": "2026-10-31 14:37:05 CET"
+  },
+  "scenario9_dims": [3, 5, 17],
+  "scenario9_aval_levels": [2, 3, 4, 5, 6],
+  "scenario9_single_obs_sites": "702",
+  "scenario9_sites_missing_a_level": ["706", "707"],
+  "scenario9_vcdExtra_full_table": "Lapack routine dgesv: system is exactly singular: U[1,1] = 0",
+  "scenario9_vcdExtra_without_single_obs_sites": "Lapack routine dgesv: system is exactly singular: U[1,1] = 0",
+  "scenario9_pooled_formula_in_R": {
+    "cor": {
+      "chisq": 0.0854431189475255,
+      "df": 1,
+      "p": 0.770052251526005
+    },
+    "rmeans": {
+      "chisq": 2.47631366666022,
+      "df": 2,
+      "p": 0.289918093143697
+    },
+    "general": {
+      "chisq": 7.03387844187971,
+      "df": 8,
+      "p": 0.532981891862085
+    }
+  },
+  "scenario9_mantelhaen_without_single_obs_sites": {
+    "statistic": 7.03387844187972,
+    "df": 8,
+    "p": 0.532981891862084
+  }
+}

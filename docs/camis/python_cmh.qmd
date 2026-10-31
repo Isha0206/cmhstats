@@ -1,0 +1,89 @@
+---
+title: "CMH Test in Python"
+---
+
+# Cochran-Mantel-Haenszel Test
+
+<!-- Draft contribution for the PHUSE CAMIS repository (python/cmh.qmd).
+     It uses the same ADCIBC data and scenarios as R/cmh.qmd and SAS/cmh.qmd. -->
+
+The CMH procedure tests for conditional independence in stratified contingency tables. SAS PROC FREQ reports three statistics: nonzero correlation, row mean scores differ, and general association. For 2 x 2 x K tables it also reports common odds ratios, relative risks and the Breslow-Day test.
+
+## Available Python packages
+
+| Package | General Association | Row Means Differ | Nonzero Correlation | M-H Odds Ratio | Homogeneity Test | Note |
+|---|---|---|---|---|---|---|
+| `statsmodels` (`StratifiedTable`) | 2x2xK only | ❌ | ❌ | ✅ | ✅ | Breslow-Day with optional Tarone adjustment. No CI for the pooled relative risk. |
+| `cmh` (PyPI 1.0.1) | ⚠️ | ❌ | ❌ | ❌ | ❌ | Wrong for tables larger than 2x2: on R's `Satisfaction` example it gives 12.53 instead of 10.20. |
+| `cmhstats` | ✅ | ✅ | ✅ | ✅ | ✅ | Table, rank, ridit and modridit scores; MH and logit OR/RR; Breslow-Day and Tarone. |
+
+## Data used
+
+```{python}
+import pandas as pd
+adcibc = pd.read_csv("../data/adcibc.csv")
+```
+
+## Example code
+
+### 2 x 2 x 2: X = treatment (placebo vs high dose), Y = sex, K = age group
+
+```{python}
+import cmhstats
+
+data2 = adcibc[(adcibc.TRTPN != 54) & (adcibc.AGEGR1 != ">80")]
+res = cmhstats.cmh_test(data=data2, x="TRTP", y="SEX", strata="AGEGR1")
+print(res)
+```
+
+`res.common_odds_ratio`, `res.relative_risk_col1` and `res.breslow_day` hold the 2 x 2 x K estimates.
+
+### 3 x 5 x 17: X = treatment, Y = CIBIC score, K = site (sparse)
+
+```{python}
+res9 = cmhstats.cmh_test(data=adcibc, x="TRTP", y="AVAL", strata="SITEID")
+print(res9)
+```
+
+Site 702 has one subject and is skipped, since it carries no information. Sites 706 and 707 each lack a treatment arm or a score level. This is what stops `vcdExtra::CMHtest` in R, which tests each stratum before pooling. The pooled statistic is well defined.
+
+### Matching R's `mantelhaen.test`
+
+R applies a continuity correction to 2 x 2 x K tables by default, and SAS does not. `cmhstats.mantelhaen_test()` follows R, including `correct=True`.
+
+```{python}
+import numpy as np
+tab = pd.crosstab([data2.TRTP, data2.SEX], data2.AGEGR1).to_numpy().reshape(2, 2, 2)
+cmhstats.mantelhaen_test(tab)                 # = stats::mantelhaen.test(...)
+cmhstats.mantelhaen_test(tab, correct=False)  # = SAS
+```
+
+## Comparison with SAS
+
+`cmhstats` reproduces all 18 SAS statistics of the R vs SAS comparison at the 4 decimals SAS prints, including scenario 9.
+
+| Scenario | Test | SAS | Python (`cmhstats`) |
+|---|---|---|---|
+| 1 | Correlation / Row Means / General | 0.2166 / 0.2166 / 0.2166 | 0.2166 / 0.2166 / 0.2166 |
+| 2 | Correlation / Row Means / General | 0.0009 / 2.4820 / 2.4820 | 0.0009 / 2.4820 / 2.4820 |
+| 3 | Correlation / Row Means / General | 0.0028 / 2.3861 / 2.3861 | 0.0028 / 2.3861 / 2.3861 |
+| 6 | Correlation / Row Means / General | 1.7487 / 1.7487 / 8.0534 | 1.7487 / 1.7487 / 8.0534 |
+| 9 | Correlation / Row Means / General | 0.0854 / 2.4763 / 7.0339 | 0.0854 / 2.4763 / 7.0339 |
+| 10 | Correlation / Row Means / General | 1.6621 / 2.2980 / 5.7305 | 1.6621 / 2.2980 / 5.7305 |
+
+Two notes for the R vs SAS page:
+
+* In scenario 2 the SAS df for row means and general association should read 2, not 1. The listed p-value, 0.2891, is the chi-square(2) tail.
+* Scenario 9 runs in R once vcdExtra's per-stratum tests are skipped. `mantelhaen.test` on the table without site 702 also gives the SAS general association value, 7.0339.
+
+## Points to watch
+
+* **Level order.** SAS sorts character levels by code point (`"65-80"` before `"<65"`), and R's default locale sort does not. With table scores, this changes the correlation and row mean scores statistics.
+* **Table scores.** SAS uses the values of numeric variables as scores and positions for character variables. Recoding a numeric response as text changes the correlation and row mean scores results.
+* **Continuity correction.** This differs between R's default and SAS for 2 x 2 x K tables (see above).
+
+# References
+
+SAS documentation, PROC FREQ, Cochran-Mantel-Haenszel Statistics.
+
+Landis, Heyman & Koch (1978). Average partial association in three-way contingency tables. *International Statistical Review* 46, 237–254.

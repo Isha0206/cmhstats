@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cmhstats"
+version = "0.1.0"
+description = "Cochran-Mantel-Haenszel statistics for Python, validated against SAS PROC FREQ and R"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Isha Bhatia" }]
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.22", "scipy>=1.8"]
+keywords = ["cochran-mantel-haenszel", "cmh", "clinical-trials", "biostatistics", "contingency-table", "sas", "van-elteren", "breslow-day"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+
+[project.optional-dependencies]
+pandas = ["pandas>=1.5"]
+test = ["pytest>=7", "pandas>=1.5", "statsmodels>=0.14"]
+
+[project.urls]
+Homepage = "https://github.com/Isha0206/cmhstats"
+Validation = "https://github.com/Isha0206/cmhstats/blob/main/docs/validation.md"
+Changelog = "https://github.com/Isha0206/cmhstats/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Isha0206/cmhstats/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
